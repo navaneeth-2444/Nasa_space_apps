@@ -1,0 +1,386 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Louis' Journey in Urbanizing Bangalore</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sixtyfour+Convergence&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            line-height: 1.6;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+        }
+        .container {
+            background-color: rgba(40, 40, 40, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-family: "Sixtyfour Convergence", sans-serif;
+            text-align: center;
+            color: #ffffff;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+            font-variation-settings:
+                "BLED" 0,
+                "SCAN" 0,
+                "XELA" 0,
+                "YELA" 0;
+        }
+
+        h2 {
+            font-family: "Space Grotesk", sans-serif;
+            text-align: center;
+            color: #ffffff;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+            font-variation-settings:
+                "BLED" 0,
+                "SCAN" 0,
+                "XELA" 0,
+                "YELA" 0;
+        }
+
+
+        .card {
+            background-color: rgba(60, 60, 60, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .button {
+            background-color: #ffffff;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+        .button:active {
+            transform: translateY(0);
+        }
+        .choices {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .alert {
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .alert-success {
+            background-color: #2e7d32;
+            color: #ffffff;
+        }
+        .alert-danger {
+            background-color: #c62828;
+            color: #ffffff;
+        }
+        #chart {
+            width: 100%;
+            height: 300px;
+            background-color: #3a3a3a;
+            border-radius: 8px;
+        }
+        #chart-fallback {
+            width: 100%;
+            height: 300px;
+            background-color: #3a3a3a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-style: italic;
+            color: #a0a0a0;
+            border-radius: 8px;
+        }
+        #score-display {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #333333;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #4a90e2;
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Louis' Journey in Urbanizing Bangalore</h1>
+        <div id="score-display">Score: 0 / 5</div>
+        <div class="progress-bar">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="story-container" class="card"></div>
+        <div id="result-container" class="card" style="display: none;"></div>
+        <div class="choices">
+            <button id="restart-button" class="button" style="display: none;">Restart Story</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function() {
+            const climateData = [
+                { year: 2010, waterScarcity: 0.2, temperature: 28, urbanization: 60 },
+                { year: 2015, waterScarcity: 0.4, temperature: 29, urbanization: 65 },
+                { year: 2020, waterScarcity: 0.6, temperature: 30, urbanization: 70 },
+                { year: 2024, waterScarcity: 0.8, temperature: 31, urbanization: 75 },
+            ];
+
+            const pages = [
+                {
+                    text: "Louis, a 10-year-old boy, moves to Bangalore with his family in 2024. As they drive into the city, Louis is amazed by the towering skyscrapers and bustling streets.",
+                    question: "What catches Louis' attention the most?",
+                    choices: ["The tall buildings", "The crowded streets"],
+                    correctChoice: "The crowded streets",
+                    explanation: "While tall buildings are impressive, noticing the crowded streets shows awareness of the city's population density, which is a key urban challenge.",
+                },
+                {
+                    text: "In his new home, Louis notices that the tap water is muddy. His parents explain that Bangalore is facing a water scarcity problem.",
+                    chart: "waterScarcity",
+                    question: "How does Louis decide to help conserve water?",
+                    choices: ["Take shorter showers", "Collect rainwater"],
+                    correctChoice: "Collect rainwater",
+                    explanation: "While taking shorter showers is good, collecting rainwater is a more proactive and sustainable approach to water conservation.",
+                },
+                {
+                    text: "During his first week of school, Louis feels uncomfortably hot. He learns about the urban heat island effect causing higher temperatures in the city.",
+                    chart: "temperature",
+                    question: "What does Louis suggest to his new friends to stay cool?",
+                    choices: ["Plant more trees", "Use more air conditioning"],
+                    correctChoice: "Plant more trees",
+                    explanation: "Planting trees is a sustainable solution that helps reduce the urban heat island effect, while using more air conditioning contributes to energy consumption and potentially exacerbates climate issues.",
+                },
+                {
+                    text: "As months pass, Louis notices more construction in his neighborhood. He realizes how quickly the city is growing and changing.",
+                    chart: "urbanization",
+                    question: "How does Louis feel about the rapid urbanization?",
+                    choices: ["Excited about progress", "Concerned about nature"],
+                    correctChoice: "Concerned about nature",
+                    explanation: "While progress is important, being concerned about nature shows awareness of the environmental impact of rapid urbanization.",
+                },
+                {
+                    text: "At the end of the year, Louis reflects on his experiences in Bangalore. He's learned a lot about urban challenges and climate change.",
+                    question: "What does Louis decide to do with his new knowledge?",
+                    choices: ["Start a school club", "Write to the mayor"],
+                    correctChoice: "Start a school club",
+                    explanation: "Starting a school club allows Louis to engage his peers and create a grassroots movement, which can have a lasting impact on raising awareness and driving change.",
+                },
+            ];
+
+            let currentPage = 0;
+            let score = 0;
+            let choices = {};
+
+            function updateScoreDisplay() {
+                document.getElementById('score-display').textContent = `Score: ${score} / ${pages.length}`;
+                const progressBar = document.getElementById('progress-bar');
+                progressBar.style.width = `${(currentPage / pages.length) * 100}%`;
+            }
+
+            function drawChart(dataKey) {
+                const chartContainer = document.getElementById('chart');
+                if (typeof Chart === 'undefined') {
+                    chartContainer.innerHTML = `
+                        <div id="chart-fallback">
+                            Chart showing ${dataKey} trend from 2010 to 2024.<br>
+                            (Chart.js failed to load. Please check your internet connection.)
+                        </div>
+                    `;
+                    return;
+                }
+
+                const ctx = chartContainer.getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: climateData.map(d => d.year),
+                        datasets: [{
+                            label: dataKey,
+                            data: climateData.map(d => d[dataKey]),
+                            borderColor: '#4a90e2',
+                            backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: '#4a4a4a'
+                                },
+                                ticks: {
+                                    color: '#e0e0e0'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: '#4a4a4a'
+                                },
+                                ticks: {
+                                    color: '#e0e0e0'
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e0e0e0'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function displayPage() {
+                const page = pages[currentPage];
+                const storyContainer = document.getElementById('story-container');
+                storyContainer.innerHTML = `
+                    <p>${page.text}</p>
+                    ${page.chart ? '<canvas id="chart"></canvas>' : ''}
+                    <h2>${page.question}</h2>
+                    <div class="choices">
+                        ${page.choices.map((choice, index) => `
+                            <button class="button choice-button" data-choice="${choice}">${choice}</button>
+                        `).join('')}
+                    </div>
+                `;
+
+                if (page.chart) {
+                    drawChart(page.chart);
+                }
+
+                document.querySelectorAll('.choice-button').forEach(button => {
+                    button.addEventListener('click', handleChoice);
+                });
+
+                updateScoreDisplay();
+            }
+
+            function handleChoice(event) {
+                const choice = event.target.dataset.choice;
+                const page = pages[currentPage];
+                choices[currentPage] = choice;
+
+                if (choice === page.correctChoice) {
+                    score++;
+                }
+
+                currentPage++;
+
+                if (currentPage < pages.length) {
+                    displayPage();
+                } else {
+                    showResults();
+                }
+            }
+
+            function showResults() {
+                const resultContainer = document.getElementById('result-container');
+                const storyContainer = document.getElementById('story-container');
+                const restartButton = document.getElementById('restart-button');
+
+                storyContainer.style.display = 'none';
+                resultContainer.style.display = 'block';
+                restartButton.style.display = 'block';
+
+                let resultsHTML = `
+                    <h2>Story Complete!</h2>
+                    <p>Thank you for joining Louis on his journey through Bangalore. Here are your choices and their impacts:</p>
+                    <ul>
+                `;
+
+                for (let i = 0; i < pages.length; i++) {
+                    const page = pages[i];
+                    const choice = choices[i];
+                    const isCorrect = choice === page.correctChoice;
+
+                    resultsHTML += `
+                        <li>
+                            Page ${i + 1}: ${choice}
+                            <div class="alert ${isCorrect ? 'alert-success' : 'alert-danger'}">
+                                ${isCorrect ? 'Great choice! ' : 'Consider this: '}
+                                ${page.explanation}
+                            </div>
+                        </li>
+                    `;
+                }
+
+                resultsHTML += `
+                    </ul>
+                    <p><strong>Your final score: ${score} out of ${pages.length}</strong></p>
+                    <p>
+                        ${score === pages.length ? "Perfect score! You made all the best choices for sustainable urban living!" :
+                        score >= pages.length / 2 ? "Good job! You made some great choices for sustainable urban living. There's always room to learn and improve!" :
+                        "There's room for improvement in your sustainable urban living choices. Keep learning and trying!"}
+                    </p>
+                `;
+
+                resultContainer.innerHTML = resultsHTML;
+                updateScoreDisplay();
+            }
+
+            function restartGame() {
+                currentPage = 0;
+                score = 0;
+                choices = {};
+                const resultContainer = document.getElementById('result-container');
+                const storyContainer = document.getElementById('story-container');
+                const restartButton = document.getElementById('restart-button');
+
+                resultContainer.style.display = 'none';
+                storyContainer.style.display = 'block';
+                restartButton.style.display = 'none';
+
+                displayPage();
+            }
+
+            // Initialize the game
+            document.getElementById('restart-button').addEventListener('click', restartGame);
+            displayPage();
+        })();
+    </script>
+</body>
+</html>

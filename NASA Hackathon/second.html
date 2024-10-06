@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UWC Design with Bangalore Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'UniNeue';
+            src: url('UniNeue-Trial-Regular.ttf') format('truetype');
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            font-family: "UniNeue", sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            height: 100vh;
+            position: relative;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .left-container, .right-container, .video-container {
+            transition: transform 0.8s ease-out;
+        }
+        .left-container.slide-out {
+            transform: translateX(-100%);
+        }
+        .right-container.slide-out, .video-container.slide-out {
+            transform: translateX(150%);
+        }
+        .left-container {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 20px;
+        }
+        .right-container {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 20px;
+            margin-right: 300px;
+        }
+        .title {
+            font-size: 150px;
+            font-weight: bold;
+            margin-top: 200px;
+        }
+        .span-container {
+            display: flex;
+            margin-top: 20px;
+        }
+        .A1, .A2 {
+            padding: 5px 25px;
+            background: rgba(163, 163, 163, 0.2);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        .A1 {
+            margin-left: 200px;
+            margin-right: 50px;
+            margin-top: -100px;
+            max-width: 400px;
+        }
+        .A2 {
+            margin-right: 50px;
+            margin-top: -260px;
+            max-width: 400px;
+        }
+        p {
+            line-height: 20px;
+            margin-top: -5px;
+        }
+        .typewriter-container {
+            position: relative;
+        }
+        .typewriter-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            transition: opacity 0.5s ease-out;
+        }
+        .placeholder-text {
+            visibility: hidden;
+            white-space: pre-wrap;
+        }
+        .page-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 100px;
+            height: 56px;
+            z-index: 1000;
+        }
+        .indicator-bar {
+            position: absolute;
+            right: 0;
+            background-color: #000;
+            transition: height 0.5s ease-in-out, top 0.5s ease-in-out;
+            border-radius: 15px;
+        }
+        .top-bar {
+            bottom: 29px;
+            width: 100px;
+            height: 10px;
+            transform-origin: bottom;
+        }
+        .middle-bar {
+            top: 30px;
+            width: 60px;
+            height: 10px;
+            transform-origin: bottom;
+        }
+        .bottom-bar {
+            top: 42px;
+            width: 100px;
+            height: 10px;
+            transition: height 0.5s ease-in-out, top 0.5s ease-in-out;
+        }
+        .state-1 .top-bar { height: 30px; width: 100px; }
+        .state-1 .middle-bar { height: 10px; width: 100px; top: 30px; }
+        .state-1 .bottom-bar { height: 10px; width: 100px; }
+        .state-2 .top-bar { height: 10px; width: 100px; }
+        .state-2 .middle-bar { height: 30px; width: 100px; }
+        .state-2 .bottom-bar { height: 10px; width: 100px; top: 65px; }
+        .state-3 .top-bar { height: 10px; width: 100px; }
+        .state-3 .middle-bar { height: 10px; width: 100px; }
+        .state-3 .bottom-bar { height: 30px; width: 100px; top: 45px;transition: all 0.5s ease-in-out; }
+        .video-container {
+            position: fixed;
+            top: 350px;
+            left: 950px;
+            width: 700px;
+            height: 700px;
+            overflow: hidden;
+            transition: transform 0.5s ease-out;
+        }
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        #videoB {
+            -webkit-mask-image: url('cursor.png');
+            -webkit-mask-size: 300px 300px;
+            -webkit-mask-repeat: no-repeat;
+            mask-image: url('cursor.png');
+            mask-size: 300px 300px;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: -9999px -9999px;
+            mask-position: -9999px -9999px;
+        }
+        .new-heading {
+            position: fixed;
+            top: -100px;
+            left: 20px;
+            font-size: 140px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .new-heading.visible {
+            opacity: 1;
+        }
+        .bar-text {
+            position: absolute;
+            left: 10px;
+            top: 3px;
+            transform: translateX(30%);
+            font-size: 18px;
+            color: white;
+            font-family: 'UniNeue', sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+        /* Bangalore heatmap styles */
+        .bangalore-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-top: 100px;
+            background-color: #f9f9f9;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        }
+
+        .bangalore-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .bangalore-content {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .bangalore-content h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .cell {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .cell:hover {
+            filter: brightness(90%);
+        }
+        .controls {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .slider-container {
+            flex-grow: 1;
+            margin-right: 20px;
+            text-align: center;
+        }
+        #yearSlider{
+            color: #000;
+            width: 50%;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .tooltip {
+            position: absolute;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 4px;
+            pointer-events: none;
+            font-size: 14px;
+        }
+        .area-label {
+            font-size: 12px;
+            fill: #333;
+            pointer-events: none;
+        }
+
+        #second-container {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        #heatmap {
+            flex: 1;
+        }
+
+        .button-container {
+            position: relative;
+            width: 200px;
+            height: 60px;
+            margin-right: 2rem;
+            margin-top: 300px;
+        }
+
+        .button-container a {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            color: rgb(0, 0, 0);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .button-container a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+        .button-container {
+    position: absolute;
+    top: 100px; /* adjust this value to position the button container next to the Bangalore container */
+    left: 50%; /* adjust this value to position the button container next to the Bangalore container */
+    transform: translateX(50%);
+}
+#myButton:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+}
+    </style>
+</head>
+<body>
+    <div class="page-indicator state-1">
+        <div class="indicator-bar top-bar"></div>
+        <div class="indicator-bar middle-bar"></div>
+        <div class="indicator-bar bottom-bar"></div>
+    </div>
+    <div class="container" id="firstPage">
+        <div class="left-container">
+            <h1 class="title">UWC.</h1>
+            <span class="A1">
+                <h2>Urbanization.</h2>
+                <div class="typewriter-container">
+                    <p class="placeholder-text" id="placeholder1">Urbanization, while bringing economic benefits, also presents challenges like housing shortages, infrastructure strain, and pollution. Sustainable urban planning is crucial for creating livable cities.</p>
+                    <p class="typewriter-text" id="text1"></p>
+                </div>
+            </span>
+        </div>
+        
+        <div class="right-container">
+            <span class="A2">
+                <h2>Water crisis.</h2>
+                <div class="typewriter-container">
+                    <p class="placeholder-text" id="placeholder2">The water crisis, caused by scarcity, pollution, and unequal access, is worsening due to climate change and population growth. Sustainable water management and international cooperation are essential for addressing this global challenge.</p>
+                    <p class="typewriter-text" id="text2"></p>
+                </div>
+            </span>
+        </div>
+        <div class="video-container">
+            <video id="videoA" autoplay muted loop playsinline>
+                <source src="RGB.webm" type="video/webm">
+            </video>
+            <video id="videoB" autoplay muted loop playsinline>
+                <source src="BW.webm" type="video/webm">
+            </video>
+        </div>
+    </div>
+    <h1 class="new-heading">Visualise.</h1>
+
+    <div class="bangalore-container">
+        <div class="bangalore-content">
+            <h2>Bangalore Population Distribution (2014-2023)</h2>
+            <div class="controls">
+                <div class="slider-container">
+                    <label for="yearSlider">Year: <span id="yearValue">2023</span></label><br>
+                    <input type="range" id="yearSlider" min="2014" max="2023" value="2023">
+                </div>
+            </div>
+            <div id="second-container">
+                <div id="particles-js"></div>
+                <div id="heatmap"></div>
+                <div class="button-container">
+                    
+                    <div class="glow"></div>
+                </div>
+            </div>
+        </div>
+        <div class="button-container">
+            <a id="myButton" href="louis_story.html"><img style="height: 300px;width: 300px;"src="louis2.png" alt="louis"></a>
+        </div>
+    </div>
+
+    <script>
+        // First page script
+        function typeWriter(element, text, speed, callback) {
+            const words = text.split(' ');
+            let currentIndex = 0;
+            element.innerHTML = '';
+
+            function typeWord() {
+                if (currentIndex < words.length) {
+                    const span = document.createElement('span');
+                    span.style.opacity = '0';
+                    span.textContent = words[currentIndex] + ' ';
+                    element.appendChild(span);
+
+                    setTimeout(() => {
+                        span.style.transition = 'opacity 0.5s ease-out';
+                        span.style.opacity = '1';
+                    }, 50);
+
+                    currentIndex++;
+                    setTimeout(typeWord, speed);
+                } else if (callback) {
+                    setTimeout(callback, 1000);
+                }
+            }
+
+            typeWord();
+        }
+
+        function startTypingEffect() {
+            const text1 = document.getElementById('placeholder1').textContent;
+            const text2 = document.getElementById('placeholder2').textContent;
+
+            const text1Element = document.getElementById('text1');
+            const text2Element = document.getElementById('text2');
+
+            text1Element.innerHTML = '';
+            text2Element.innerHTML = '';
+
+            typeWriter(text1Element, text1, 150, () => {
+                typeWriter(text2Element, text2, 150, () => {
+                    setTimeout(startTypingEffect, 6000);
+                });
+            });
+        }
+
+        setTimeout(startTypingEffect, 500);
+
+        const videoContainer = document.querySelector('.video-container');
+        const videoB = document.getElementById('videoB');
+        const videoA = document.getElementById('videoA');
+
+        async function syncVideos() {
+            videoA.currentTime = 0;
+            videoB.currentTime = 0;
+
+            try {
+                await Promise.all([videoA.play(), videoB.play()]);
+
+                videoA.addEventListener('timeupdate', () => {
+                    if (Math.abs(videoA.currentTime - videoB.currentTime) > 0.1) {
+                        videoB.currentTime = videoA.currentTime;
+                    }
+                });
+            } catch (error) {
+                console.error('Error playing videos:', error);
+            }
+        }
+
+        let videosLoaded = 0;
+        function handleVideoLoad() {
+            videosLoaded++;
+            if (videosLoaded === 2) {
+                syncVideos();
+            }
+        }
+
+        videoA.addEventListener('loadeddata', handleVideoLoad);
+        videoB.addEventListener('loadeddata', handleVideoLoad);
+
+        videoContainer.addEventListener('mousemove', (e) => {
+            const rect = videoContainer.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const maskSize = 200;
+
+            videoB.style.webkitMaskPosition = `${x - maskSize / 2}px ${y - maskSize / 2}px`;
+            videoB.style.maskPosition = `${x - maskSize / 2}px ${y - maskSize / 2}px`;
+        });
+
+        videoContainer.addEventListener('mouseleave', () => {
+            videoB.style.webkitMaskPosition = '-9999px -9999px';
+            videoB.style.maskPosition = '-9999px -9999px';
+        });
+
+        let animationComplete = false;
+        let timeoutId = null;
+
+        window.addEventListener('scroll', () => {
+            const scrollPosition = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const leftContainer = document.querySelector('.left-container');
+            const rightContainer = document.querySelector('.right-container');
+            const videoContainer = document.querySelector('.video-container');
+            const pageIndicator = document.querySelector('.page-indicator');
+            const newHeading = document.querySelector('.new-heading');
+            const bangaloreContainer = document.querySelector('.bangalore-container');
+
+            // First transition (around 20% scroll)
+            if (scrollPosition > windowHeight * 0.2) {
+                leftContainer.classList.add('slide-out');
+                rightContainer.classList.add('slide-out');
+                videoContainer.classList.add('slide-out');
+                
+                if (scrollPosition < windowHeight * 0.8) { // Check if we're not too far down
+                    pageIndicator.classList.remove('state-1', 'state-3');
+                    pageIndicator.classList.add('state-2');
+                }
+
+                if (!animationComplete) {
+                    animationComplete = true;
+                    if (timeoutId) clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        newHeading.classList.add('visible');
+                        setTimeout(() => {
+                            bangaloreContainer.classList.add('visible');
+                        }, 500);
+                    }, 800);
+                }
+            } else {
+                leftContainer.classList.remove('slide-out');
+                rightContainer.classList.remove('slide-out');
+                videoContainer.classList.remove('slide-out');
+                
+                pageIndicator.classList.remove('state-2', 'state-3');
+                pageIndicator.classList.add('state-1');
+                
+                animationComplete = false;
+                newHeading.classList.remove('visible');
+                bangaloreContainer.classList.remove('visible');
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    timeoutId = null;
+                }
+            }
+
+            // Second transition (around 80% scroll)
+            if (scrollPosition > windowHeight * 0.8) {
+                pageIndicator.classList.remove('state-1', 'state-2');
+                pageIndicator.classList.add('state-3');
+            }
+        });
+        const areas = [
+            "North West", "North", "North East",
+            "West", "Central", "East",
+            "South West", "South", "South East"
+        ];
+        const years = d3.range(2014, 2024);
+        const fullData = [];
+        
+        // Generate more realistic data
+        areas.forEach(area => {
+            let basePopulation = 1.5 + Math.random() * 0.5;
+            const growthRate = 1 + (Math.random() * 0.08);
+            
+            years.forEach(year => {
+                basePopulation *= growthRate;
+                fullData.push({
+                    year: year,
+                    area: area,
+                    population: basePopulation + (Math.random() * 0.2 - 0.1)
+                });
+            });
+        });
+
+        // Set up dimensions
+        const margin = {top: 50, right: 100, bottom: 50, left: 50};
+        const width = 600 - margin.left - margin.right;
+        const height = 600 - margin.top - margin.bottom;
+
+        // Create color scale with heat colors
+        const colorScale = d3.scaleSequential()
+            .domain([d3.min(fullData, d => d.population), d3.max(fullData, d => d.population)])
+            .interpolator(d3.interpolateInferno);
+
+        // Create SVG
+        const svg = d3.select("#heatmap")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Create scales for 3x3 grid
+        const xScale = d3.scaleBand()
+            .domain([0, 1, 2])
+            .range([0, width])
+            .padding(0.05);  // Reduced padding to bring squares closer
+
+        const yScale = d3.scaleBand()
+            .domain([0, 1, 2])
+            .range([0, height])
+            .padding(0.05);  // Reduced padding to bring squares closer
+
+        // Function to update visualization
+        function updateViz(selectedYear) {
+            const yearData = fullData.filter(d => d.year === selectedYear);
+            
+            // Update cells
+            const cells = svg.selectAll(".cell")
+                .data(yearData, d => d.area);
+
+            cells.enter()
+                .append("rect")
+                .attr("class", "cell")
+                .attr("rx", 10)  // Rounded corners
+                .attr("ry", 10)  // Rounded corners
+                .merge(cells)
+                .transition()
+                .duration(500)
+                .attr("x", (d, i) => xScale(i % 3))
+                .attr("y", (d, i) => yScale(Math.floor(i / 3)))
+                .attr("width", xScale.bandwidth())
+                .attr("height", yScale.bandwidth())
+                .style("fill", d => colorScale(d.population));
+
+            // Update area labels
+            const labels = svg.selectAll(".area-label")
+                .data(yearData, d => d.area);
+
+            labels.enter()
+                .append("text")
+                .attr("class", "area-label")
+                .merge(labels)
+                .attr("x", (d, i) => xScale(i % 3) + xScale.bandwidth() / 2)
+                .attr("y", (d, i) => yScale(Math.floor(i / 3)) + yScale.bandwidth() / 2)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle")
+                .text(d => d.area)
+                .style("fill", d => d3.lab(colorScale(d.population)).l < 50 ? "white" : "black");
+
+            // Update events
+            svg.selectAll(".cell")
+                .on("mouseover", function(event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr("stroke", "white")
+                        .attr("stroke-width", 2);
+                    
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(`${d.area}<br>Population: ${d.population.toFixed(2)}M`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function() {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .attr("stroke", null);
+                    
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+
+            // Update year display
+            d3.select("#yearValue").text(selectedYear);
+            d3.select("#yearSlider").property("value", selectedYear);
+        }
+
+        // Add legend
+        const legendWidth = 20;
+        const legendHeight = height;
+        
+        const legendScale = d3.scaleLinear()
+            .domain([d3.min(fullData, d => d.population), d3.max(fullData, d => d.population)])
+            .range([legendHeight, 0]);
+
+        const legendAxis = d3.axisRight(legendScale)
+            .tickFormat(d => d.toFixed(1) + "M");
+
+        const legend = svg.append("g")
+            .attr("transform", `translate(${width + 10},0)`);
+
+        const gradient = legend.append("defs")
+            .append("linearGradient")
+            .attr("id", "gradient")
+            .attr("x1", "0%")
+            .attr("y1", "100%")
+            .attr("x2", "0%")
+            .attr("y2", "0%");
+
+        const numberStops = 10;
+        for (let i = 0; i <= numberStops; i++) {
+            const offset = i / numberStops;
+            const value = d3.min(fullData, d => d.population) + 
+                          (d3.max(fullData, d => d.population) - d3.min(fullData, d => d.population)) * offset;
+            gradient.append("stop")
+                .attr("offset", `${offset * 100}%`)
+                .attr("stop-color", colorScale(value));
+        }
+
+        legend.append("rect")
+            .attr("width", legendWidth)
+            .attr("height", legendHeight)
+            .style("fill", "url(#gradient)");
+
+        legend.append("g")
+            .attr("transform", `translate(${legendWidth},0)`)
+            .call(legendAxis);
+
+        // Create tooltip
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        // Initialize visualization
+        updateViz(2023);
+
+        // Slider event listener
+        d3.select("#yearSlider").on("input", function() {
+            updateViz(+this.value);
+        });
+
+        // Play button functionality
+        let interval;
+        d3.select("#playButton").on("click", function() {
+            const button = d3.select(this);
+            if (button.text() === "▶ Play Animation") {
+                button.text("⏸ Pause");
+                let currentYear = +d3.select("#yearSlider").property("value");
+                interval = setInterval(() => {
+                    currentYear = currentYear >= 2023 ? 2014 : currentYear + 1;
+                    updateViz(currentYear);
+                }, 1000);
+            } else {
+                button.text("▶ Play Animation");
+                clearInterval(interval);
+            }
+        });
+        
+
+        </script>
+    </body>
+</html>
